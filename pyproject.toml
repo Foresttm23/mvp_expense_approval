@@ -1,0 +1,11 @@
+[project]
+name = "mvp-expense-approval"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.19.1",
+    "fastapi[standard]>=0.141.1",
+    "loguru>=0.7.3",
+]

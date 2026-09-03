@@ -18,7 +18,7 @@ class NotFoundError(AppException):
 
 
 class InvalidStateTransitionError(AppException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     default_message = "Invalid state transition"
 
 
@@ -30,3 +30,16 @@ class UnauthorizedActionError(AppException):
 class ValidationError(AppException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_message = "Validation error"
+
+
+class SessionNotInitializedException(AppException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_message = "Database session is not initialized"
+
+    def __init__(self, db_name: str | None = None):
+        message = (
+            f"Database session '{db_name}' is not initialized"
+            if db_name
+            else self.default_message
+        )
+        super().__init__(message)

@@ -1,24 +1,15 @@
-from starlette.types import Lifespan
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-
-from app.core.database import init_db, close_db
-
-from app.core.exceptions.handlers import register_handlers
-
-from app.core.logging import setup_logging
-from app.core.config import get_settings
 from loguru import logger
 
-
-app = FastAPI(
-    title="MVP Expense Approval API",
-    version="0.1.0",
-)
-
-register_handlers(app)
+from app.core.config import get_settings
+from app.core.database import close_db, init_db
+from app.core.exceptions.handlers import register_handlers
+from app.core.logging import setup_logging
 
 
-@Lifespan()
+@asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
 
@@ -31,6 +22,16 @@ async def lifespan(app: FastAPI):
     logger.info("Shutdown")
 
     await close_db()
+
+
+app = FastAPI(
+    title="MVP Expense Approval API",
+    version="0.1.0",
+    lifespan=lifespan,
+)
+
+register_handlers(app)
+
 
 if __name__ == "__main__":
     import uvicorn

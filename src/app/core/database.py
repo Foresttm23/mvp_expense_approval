@@ -1,5 +1,6 @@
 import contextlib
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import (
@@ -31,7 +32,7 @@ class DBSessionManager:
             self.sessionmaker = None
 
     @contextlib.asynccontextmanager
-    async def session(self) -> AsyncGenerator[AsyncSession, None]:
+    async def session(self) -> AsyncGenerator[AsyncSession]:
         if self.sessionmaker is None:
             raise SessionNotInitializedException("POSTGRES_DB")
 

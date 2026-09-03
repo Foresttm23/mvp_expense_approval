@@ -1,15 +1,13 @@
 from datetime import datetime
+from typing import Any, ClassVar
 
 from sqlalchemy import DateTime
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.sql import func
 
 
-from sqlalchemy.orm import DeclarativeBase
-
-
 class ExpenseBase(DeclarativeBase):
-    __mapper_args__ = {"eager_defaults": True}
+    __mapper_args__: ClassVar[dict[str, Any]] = {"eager_defaults": True}
 
 
 class CreatedAtMixin:

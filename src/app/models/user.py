@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, String
+from sqlalchemy import JSON, Boolean, DateTime, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -41,6 +42,12 @@ class User(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
         Boolean,
         default=True,
         nullable=False,
+    )
+
+    token_revoked_before: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
     )
 
     def __repr__(self) -> str:

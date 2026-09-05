@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 
+from app.api.v1.router import api_v1_router
 from app.core.config import get_settings
 from app.core.database import close_db, init_db
 from app.core.exceptions.handlers import register_handlers
@@ -31,9 +32,10 @@ app = FastAPI(
 )
 
 register_handlers(app)
+app.include_router(api_v1_router)
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="[IP_ADDRESS]", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

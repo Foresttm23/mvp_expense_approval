@@ -15,7 +15,10 @@ class ExpenseSettings(BaseSettings):
     )
     APP_ENV: str = "development"
 
-    # Deterministic fallback category-to-approver email mapping
+    # JWT / Auth
+    SECRET_KEY: str = "my_secret_key"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
     DEFAULT_CATEGORY_APPROVERS: dict[str, str] = {
         "OFFICE": "approver_office@example.com",
         "TRAVEL": "approver_travel@example.com",

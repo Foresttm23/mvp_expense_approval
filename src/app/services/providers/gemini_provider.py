@@ -23,12 +23,9 @@ class GeminiProvider(LLMProvider):
         """
         Send *prompt* to Gemini and return the raw response text.
 
-        Raises
-        ------
-        RuntimeError
-            If no API key was provided at construction time.
-        google.genai.errors.APIError
-            On any Gemini API-level failure (network, quota, etc.).
+        Raises:
+            RuntimeError: If no API key was provided at construction time.
+            google.genai.errors.APIError: On any Gemini API-level failure (network, quota, etc.).
         """
         if self._client is None:
             raise RuntimeError(

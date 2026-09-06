@@ -23,10 +23,10 @@ class AuthService:
 
     async def register(self, payload: UserCreate) -> tuple[User, Token]:
         """
-        Raises
-        ------
-        ValidationError
-            If a user with the same email already exists.
+        Register a new user and return user instance with access token.
+
+        Raises:
+            ValidationError: If a user with the same email already exists.
         """
         if await self._user_repo.get_by_email(payload.email):
             raise ValidationError(
@@ -49,10 +49,10 @@ class AuthService:
 
     async def login(self, email: str, password: str) -> Token:
         """
-        Raises
-        ------
-        UnauthorizedActionError
-            If credentials are invalid or the account is inactive.
+        Authenticate user by email and password and return access token.
+
+        Raises:
+            UnauthorizedActionError: If credentials are invalid or the account is inactive.
         """
         user = await self._user_repo.get_by_email(email)
 
@@ -69,10 +69,10 @@ class AuthService:
 
     async def get_user_by_id(self, user_id: str) -> User:
         """
-        Raises
-        ------
-        NotFoundError
-            If no user with the given ID exists.
+        Retrieve a user by their unique identifier.
+
+        Raises:
+            NotFoundError: If no user with the given ID exists.
         """
         try:
             uid = uuid.UUID(user_id)

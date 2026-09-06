@@ -54,10 +54,8 @@ class AIService:
 
         This method is non-blocking, any failure causes fallback response.
 
-        Returns
-        -------
-        AIAnalysisResponse
-            Populated on success; fallback payload on any failure.
+        Returns:
+            AIAnalysisResponse: Populated on success; fallback payload on any failure.
         """
         log = logger.bind(expense_id=str(expense.id))
 

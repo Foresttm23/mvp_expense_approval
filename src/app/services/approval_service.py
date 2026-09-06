@@ -36,9 +36,8 @@ class ApprovalService:
         """
         Return *pending* claims assigned to the given approver (FIFO).
 
-        Returns
-        -------
-        ``(items, total_count)`` pair.
+        Returns:
+            ``(items, total_count)`` pair.
         """
         return await self._expense_repo.get_approver_queue(
             approver_id,
@@ -54,10 +53,8 @@ class ApprovalService:
         """
         Return a specific expense visible to the approver.
 
-        Raises
-        ------
-        NotFoundError
-            If the expense does not exist or is not assigned to *approver_id*.
+        Raises:
+            NotFoundError: If the expense does not exist or is not assigned to *approver_id*.
         """
         expense = await self._expense_repo.get_by_id_scoped(expense_id, approver_id)
         if expense is None:
@@ -74,19 +71,13 @@ class ApprovalService:
         """
         Approve a pending claim assigned to *approver_id*.
 
-        Returns
-        -------
-        Expense
-            The updated expense in ``approved`` state.
+        Returns:
+            Expense: The updated expense in ``approved`` state.
 
-        Raises
-        ------
-        NotFoundError
-            If the expense does not exist.
-        UnauthorizedActionError
-            If *approver_id* is not the assigned approver.
-        InvalidStateTransitionError
-            If the expense is not in ``pending`` state.
+        Raises:
+            NotFoundError: If the expense does not exist.
+            UnauthorizedActionError: If *approver_id* is not the assigned approver.
+            InvalidStateTransitionError: If the expense is not in ``pending`` state.
         """
         log = logger.bind(
             expense_id=str(expense_id),
@@ -116,21 +107,14 @@ class ApprovalService:
         """
         Reject a pending claim with a mandatory non-empty reason.
 
-        Returns
-        -------
-        Expense
-            The updated expense in ``rejected`` state.
+        Returns:
+            Expense: The updated expense in ``rejected`` state.
 
-        Raises
-        ------
-        NotFoundError
-            If the expense does not exist.
-        UnauthorizedActionError
-            If *approver_id* is not the assigned approver.
-        InvalidStateTransitionError
-            If the expense is not in ``pending`` state.
-        ValueError
-            If *reason* is empty or contains only whitespace.
+        Raises:
+            NotFoundError: If the expense does not exist.
+            UnauthorizedActionError: If *approver_id* is not the assigned approver.
+            InvalidStateTransitionError: If the expense is not in ``pending`` state.
+            ValueError: If *reason* is empty or contains only whitespace.
         """
         stripped_reason = reason.strip()
         if not stripped_reason:

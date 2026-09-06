@@ -30,10 +30,10 @@ class ExpenseService:
         payload: ExpenseCreate,
     ) -> Expense:
         """
-        Raises
-        ------
-        ValidationError
-            If no approver is configured for the chosen category.
+        Create and route a new pending expense claim.
+
+        Raises:
+            ValidationError: If no approver is configured for the chosen category.
         """
         log = logger.bind(
             applicant_id=str(applicant_id),
@@ -70,14 +70,10 @@ class ExpenseService:
         """
         Withdraw a pending claim owned by *applicant_id*.
 
-        Raises
-        ------
-        NotFoundError
-            If the expense does not exist.
-        UnauthorizedActionError
-            If the caller is not the applicant.
-        InvalidStateTransitionError
-            If the expense is not in ``pending`` state (already resolved).
+        Raises:
+            NotFoundError: If the expense does not exist.
+            UnauthorizedActionError: If the caller is not the applicant.
+            InvalidStateTransitionError: If the expense is not in ``pending`` state (already resolved).
         """
         log = logger.bind(
             expense_id=str(expense_id),
@@ -126,7 +122,7 @@ class ExpenseService:
         Optionally filters by approval/review status for display in user dashboards.
 
         Returns:
-            A tuple of ``(items, total_count)``.
+            ``(items, total_count)`` pair.
         """
         return await self._expense_repo.get_by_applicant(
             applicant_id,
@@ -143,10 +139,8 @@ class ExpenseService:
         """
         Return a specific claim visible to the applicant.
 
-        Raises
-        ------
-        NotFoundError
-            If the expense does not exist or is not accessible by *applicant_id*.
+        Raises:
+            NotFoundError: If the expense does not exist or is not accessible by *applicant_id*.
         """
         expense = await self._expense_repo.get_by_id_scoped(expense_id, applicant_id)
         if expense is None:

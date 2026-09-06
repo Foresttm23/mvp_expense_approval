@@ -43,8 +43,10 @@ class BaseRepository[ModelType: ExpenseBase]:
 
     async def count(self, stmt: Select | None = None) -> int:
         if stmt is not None:
-            # Strip order_by as it not needed for count
-            count_stmt = select(func.count()).select_from(stmt.order_by(None).subquery())
+            # Strip order_by as it is not needed for count
+            count_stmt = select(func.count()).select_from(
+                stmt.order_by(None).subquery()
+            )
         else:
             count_stmt = select(func.count()).select_from(self.model)
         result = await self._session.execute(count_stmt)

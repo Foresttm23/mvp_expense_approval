@@ -51,7 +51,9 @@ class ExpenseRepository(BaseRepository[Expense]):
         limit: int = 50,
     ) -> tuple[list[Expense], int]:
         """
-        Return *pending* claims assigned to the given approver. 
+        Returns
+        -------
+        *pending* claims assigned to the given approver.
         FIFO order.
         """
         stmt = (

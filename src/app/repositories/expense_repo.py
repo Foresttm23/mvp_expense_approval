@@ -27,9 +27,8 @@ class ExpenseRepository(BaseRepository[Expense]):
         """
         Query expenses by applicant ID ordered by creation date descending.
 
-        Returns
-        -------
-        ``(items, total_count)`` pair of claims submitted by *applicant_id*.
+        Returns:
+            ``(items, total_count)`` pair of claims submitted by *applicant_id*.
         """
         stmt = (
             select(Expense)
@@ -51,10 +50,10 @@ class ExpenseRepository(BaseRepository[Expense]):
         limit: int = 50,
     ) -> tuple[list[Expense], int]:
         """
-        Returns
-        -------
-        *pending* claims assigned to the given approver.
-        FIFO order.
+        Return pending claims assigned to the given approver (FIFO).
+
+        Returns:
+            ``(items, total_count)`` pair.
         """
         stmt = (
             select(Expense)

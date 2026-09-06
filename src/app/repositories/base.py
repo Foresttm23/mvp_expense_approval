@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.selectable import Select
 
 from app.models.base import ExpenseBase
 
@@ -27,32 +28,26 @@ class BaseRepository[ModelType: ExpenseBase]:
         )
         return result.scalar_one_or_none()
 
-    async def list_paginated(
+    async def paginate_query(
         self,
+        stmt: Select[tuple[ModelType]],
         *,
         offset: int = 0,
         limit: int = 50,
-    ) -> tuple[list[ModelType], int]:
+    ) -> list[ModelType]:
         safe_limit = min(max(limit, 1), 100)
         safe_offset = max(offset, 0)
+        paged_stmt = stmt.offset(safe_offset).limit(safe_limit)
+        res = await self._session.execute(paged_stmt)
+        return list(res.scalars().all())
 
-        stmt = (
-            select(self.model)
-            .order_by(self.model.created_at.desc())
-            .offset(safe_offset)
-            .limit(safe_limit)
-        )
-
-        items_res = await self._session.execute(stmt)
-        total = await self.count()
-
-        return list(items_res.scalars().all()), total
-
-    async def count(self) -> int:
-        """Return the total number of records for the model."""
-        result = await self._session.execute(
-            select(func.count()).select_from(self.model)
-        )
+    async def count(self, stmt: Select | None = None) -> int:
+        if stmt is not None:
+            # Strip order_by as it not needed for count
+            count_stmt = select(func.count()).select_from(stmt.order_by(None).subquery())
+        else:
+            count_stmt = select(func.count()).select_from(self.model)
+        result = await self._session.execute(count_stmt)
         return result.scalar_one()
 
     async def update(self, instance: ModelType, **kwargs: Any) -> ModelType:

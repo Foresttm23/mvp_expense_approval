@@ -12,7 +12,6 @@ class AIAnalysisResponse(OutputModel):
 
     @classmethod
     def fallback(cls, status: str = AIAnalysisStatus.UNAVAILABLE.value) -> Self:
-        """Returns a non-blocking fallback response when AI service fails or times out."""
         return cls(
             summary=None,
             is_inconsistent=False,

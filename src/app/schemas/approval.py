@@ -1,35 +1,21 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
 
-from pydantic import Field, field_validator
+from pydantic import Field
 
 from app.core.enums import ApprovalAction
+from app.schemas.ai import AIAnalysisResponse
 from app.schemas.base import InputModel, OutputModel
+from app.schemas.expense import ExpenseResponse
 
 
 class ApproveRequest(InputModel):
-    comment: str | None = None
-
-    @field_validator("comment")
-    @classmethod
-    def strip_comment(cls, value: str | None) -> str | None:
-        if value is not None:
-            stripped = value.strip()
-            return stripped if stripped else None
-        return None
-
+    pass
 
 class RejectRequest(InputModel):
-    reason: str = Field(..., min_length=1)
-
-    @field_validator("reason")
-    @classmethod
-    def validate_non_empty_reason(cls, value: str) -> str:
-        stripped = value.strip()
-        if not stripped:
-            raise ValueError("Rejection reason cannot be empty or whitespace only")
-        return stripped
-
+    reason: str = Field(min_length=1)
 
 class ApprovalLogResponse(OutputModel):
     id: uuid.UUID
@@ -38,3 +24,8 @@ class ApprovalLogResponse(OutputModel):
     action: ApprovalAction
     comment: str | None = None
     created_at: datetime
+
+
+class ApprovalClaimResponse(OutputModel):
+    expense: ExpenseResponse
+    ai_analysis: AIAnalysisResponse

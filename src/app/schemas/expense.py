@@ -9,11 +9,11 @@ from app.schemas.base import InputModel, OutputModel
 
 
 class ExpenseBase(InputModel):
-    amount: Decimal = Field(..., gt=0, max_digits=10, decimal_places=2)
+    amount: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
     category: ExpenseCategory
-    description: str = Field(..., min_length=1)
+    description: str = Field(min_length=1)
     expense_date: date
-    payment_details: str = Field(..., min_length=1, max_length=500)
+    payment_details: str = Field(min_length=1, max_length=500)
 
     @field_validator("description", "payment_details")
     @classmethod

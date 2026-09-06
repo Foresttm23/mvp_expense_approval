@@ -30,24 +30,25 @@ src/app/
 
 ---
 
-## Authentication & Token Policy Notes
+## Authentication Notes
 
-### Future Token Revocation (`iat` & `token_revoked_before`)
+- **JWT Tokens**: Standard 60-minute bearer tokens.
+- **Session Revocation**: The `User` model includes a `token_revoked_before` timestamp column and an `iat` claim in the JWT. This makes it easy to add single-user session revocation (e.g. `/auth/logout`) in the future without database schema changes.
 
-> [!NOTE]
-> **Token Revocation Architecture (Future Feature)**
-> 
-> - **JWT `iat` Claim**: Every access token issued via `core/security.py` includes an **Issued At (`iat`)** timestamp claim representing UTC Unix epoch seconds.
-> - **`User.token_revoked_before` Field**: The `User` ORM model contains a nullable timezone-aware datetime column `token_revoked_before: Mapped[datetime | None]`.
-> - **Design Intent**: For the MVP, token invalidation relies on short-lived tokens (60-minute TTL) and immediate account deactivation via `is_active = False`. The `token_revoked_before` column and `iat` claim are pre-configured to enable instantaneous single-user or global session revocation in a future release:
->   ```python
->   # Planned verification in auth validation pipeline:
->   if user.token_revoked_before is not None:
->       token_iat = datetime.fromtimestamp(payload["iat"], tz=UTC)
->       if token_iat < user.token_revoked_before:
->           raise UnauthorizedActionError("Token has been revoked.")
->   ```
-> - Calling a future `/auth/logout` or `/auth/revoke-all` endpoint will set `user.token_revoked_before = datetime.now(UTC)` to instantly invalidate all previously issued tokens for that account.
+---
+
+## AI Advisory
+
+- **Provider-Agnostic**: Core business logic depends on an abstract `LLMProvider` interface rather than calling the Gemini SDK directly. Gemini is plugged in as an adapter in `services/providers/gemini_provider.py`.
+- **On-Demand**: Triggered when an approver opens a claim for review (`GET /api/v1/approvals/{id}`).
+- **Graceful Fallback**: Wrapped in a 3.0s timeout. If the LLM is slow, down, or missing an API key, it returns a fallback response so the approver's workflow is never blocked.
+
+### Future Improvements
+
+> If expanding this beyond an MVP, a few things could be improved:
+>
+> - **Faster page loads**: Right now, the AI analysis runs during the expense review request. We could split it into a separate endpoint so the expense details show up instantly while the AI summary loads in the background.
+> - **Caching**: If an approver re-opens the same expense, we could cache the previous AI response so we don't pay for the same LLM call twice.
 
 ---
 

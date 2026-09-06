@@ -41,11 +41,16 @@ class UserRepository(BaseRepository[User]):
 
     async def _fallback_category_approver(self, category: ExpenseCategory) -> User | None:
         """Find the approver for a category from the fallback map."""
-        fallback_email = get_settings().DEFAULT_CATEGORY_APPROVERS.get(
+        config_entry = get_settings().DEFAULT_CATEGORY_APPROVERS.get(
             category.value
         )
-        if fallback_email:
-            return await self.get_by_email(fallback_email)
+        if not config_entry:
+            return None
+
+        email = config_entry.email
+        if email:
+            return await self.get_by_email(email)
 
         return None
+
 

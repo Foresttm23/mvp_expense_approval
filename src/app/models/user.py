@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, String
+from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.enums import UserRole
@@ -27,7 +28,7 @@ class User(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
         nullable=False,
     )
     roles: Mapped[list[str]] = mapped_column(
-        JSON,
+        JSONB,
         default=lambda: [str(UserRole.EMPLOYEE)],
         nullable=False,
     )

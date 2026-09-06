@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from typing import TYPE_CHECKING
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +15,9 @@ from app.core.exceptions.app import (
 from app.models.expense import Expense
 from app.repositories.approval_repo import ApprovalRepository
 from app.repositories.expense_repo import ExpenseRepository
+
+if TYPE_CHECKING:
+    from loguru import Logger
 
 
 class ApprovalService:
@@ -69,7 +73,7 @@ class ApprovalService:
     ) -> Expense:
         """
         Approve a pending claim assigned to *approver_id*.
-        
+
         Returns
         -------
         Expense
@@ -89,13 +93,7 @@ class ApprovalService:
             approver_id=str(approver_id),
         )
 
-        expense = await self._expense_repo.get_by_id_for_update(expense_id)
-        if expense is None:
-            raise NotFoundError(f"Expense '{expense_id}' not found.")
-
-        self._assert_is_assigned_approver(expense, approver_id, log)
-        self._assert_is_pending(expense, log)
-
+        expense = await self._get_and_verify_expense(expense_id, approver_id, log)
         expense = await self._expense_repo.update(
             expense, status=ExpenseStatus.APPROVED
         )
@@ -143,18 +141,13 @@ class ApprovalService:
             approver_id=str(approver_id),
         )
 
-        expense = await self._expense_repo.get_by_id_for_update(expense_id)
-        if expense is None:
-            raise NotFoundError(f"Expense '{expense_id}' not found.")
-
-        self._assert_is_assigned_approver(expense, approver_id, log)
-        self._assert_is_pending(expense, log)
-
+        expense = await self._get_and_verify_expense(expense_id, approver_id, log)
         expense = await self._expense_repo.update(
             expense,
             status=ExpenseStatus.REJECTED,
             rejection_reason=stripped_reason,
         )
+
         await self._approval_repo.create_log(
             expense_id=expense_id,
             actor_id=approver_id,
@@ -166,11 +159,22 @@ class ApprovalService:
         log.info("Expense claim rejected")
         return expense
 
+    async def _get_and_verify_expense(
+        self, expense_id: uuid.UUID, approver_id: uuid.UUID, log: Logger
+    ) -> Expense:
+        expense = await self._expense_repo.get_by_id_for_update(expense_id)
+        if expense is None:
+            raise NotFoundError(f"Expense '{expense_id}' not found.")
+
+        self._assert_is_assigned_approver(expense, approver_id, log)
+        self._assert_is_pending(expense, log)
+        return expense
+
     @staticmethod
     def _assert_is_assigned_approver(
         expense: Expense,
         approver_id: uuid.UUID,
-        log: logger,
+        log: Logger,
     ) -> None:
         if expense.assigned_approver_id != approver_id:
             log.warning("Action attempted by non-assigned approver")
@@ -181,7 +185,7 @@ class ApprovalService:
     @staticmethod
     def _assert_is_pending(
         expense: Expense,
-        log: logger,
+        log: Logger,
     ) -> None:
         if expense.status != ExpenseStatus.PENDING:
             log.warning(

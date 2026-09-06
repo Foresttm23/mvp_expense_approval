@@ -35,12 +35,8 @@ class AuthService:
 
         hashed = await hash_password(payload.password)
         user = await self._user_repo.create(
-            id=uuid.uuid4(),
-            email=payload.email,
+            **payload.model_dump(exclude={"password"}),
             hashed_password=hashed,
-            full_name=payload.full_name,
-            roles=payload.roles,
-            is_active=payload.is_active,
         )
         await self._session.commit()
 

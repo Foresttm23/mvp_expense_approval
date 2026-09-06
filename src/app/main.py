@@ -11,7 +11,7 @@ from app.core.logging import setup_logging
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_: FastAPI):
     setup_logging()
 
     # Startup
@@ -20,7 +20,6 @@ async def lifespan(app: FastAPI):
     expense_settings = get_settings()
     init_db(expense_settings.DATABASE_URL, pool_size=20, max_overflow=10)
     yield
-    logger.info("Shutdown")
 
     await close_db()
 
@@ -33,7 +32,6 @@ app = FastAPI(
 
 register_handlers(app)
 app.include_router(api_v1_router)
-
 
 if __name__ == "__main__":
     import uvicorn

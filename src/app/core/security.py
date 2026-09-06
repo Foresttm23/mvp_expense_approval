@@ -18,10 +18,12 @@ def _get_secret() -> str:
 
 
 async def hash_password(password: str) -> str:
+    # noinspection bad-argument-type
     return await asyncio.to_thread(password_hash.hash, password)
 
 
 async def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # noinspection bad-argument-type
     return await asyncio.to_thread(
         password_hash.verify, plain_password, hashed_password
     )

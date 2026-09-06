@@ -38,7 +38,7 @@ class ExpenseService:
         log = logger.bind(
             applicant_id=str(applicant_id),
             category=payload.category,
-            amount=str(payload.amount),
+            amount=payload.amount,
         )
 
         approver = await self._user_repo.get_approver_by_category(payload.category)

@@ -27,7 +27,7 @@ Rules:
   mismatched or suspicious (e.g. category is OFFICE but description mentions
   a flight; unusually large amounts for the stated category).
 - "inconsistency_reason" must be null when "is_inconsistent" is false.
-- Match the language of an expense claim if its in [Ukranian, Russian, English],
+- Match the language of an expense claim if its in [Ukrainian, Russian, English],
   else respond in English.
 """
 
@@ -50,7 +50,7 @@ class AIService:
 
     async def analyse_expense(self, expense: Expense) -> AIAnalysisResponse:
         """
-        Analyse an expense claim and return an advisory response.
+        Analyze an expense claim and return an advisory response.
 
         This method is non-blocking, any failure causes fallback response.
 
@@ -67,9 +67,11 @@ class AIService:
             async with asyncio.timeout(self._timeout):
                 raw: str = await self._provider.analyse(prompt)
         except TimeoutError:
-            log.warning(f"AI provider timed out after {self._timeout}s — returning fallback")
+            log.warning(
+                f"AI provider timed out after {self._timeout}s — returning fallback"
+            )
             return AIAnalysisResponse.fallback(AIAnalysisStatus.UNAVAILABLE)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             log.warning(f"AI provider raised an error — returning fallback: {exc}")
             return AIAnalysisResponse.fallback(AIAnalysisStatus.ERROR)
 

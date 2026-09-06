@@ -10,10 +10,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import ApprovalAction
 from app.models.base import ExpenseBase
+from app.models.user import User
 
 if TYPE_CHECKING:
     from app.models.expense import Expense
-    from app.models.user import User
 
 
 class ApprovalLog(ExpenseBase):
@@ -58,7 +58,7 @@ class ApprovalLog(ExpenseBase):
         lazy="selectin",
     )
     actor: Mapped[User] = relationship(
-        "User",
+        User,
         lazy="selectin",
     )
 

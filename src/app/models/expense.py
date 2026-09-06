@@ -11,10 +11,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import ExpenseCategory, ExpenseStatus
 from app.models.base import CreatedAtMixin, ExpenseBase, UpdatedAtMixin
+from app.models.user import User
 
 if TYPE_CHECKING:
     from app.models.approval import ApprovalLog
-    from app.models.user import User
 
 
 class Expense(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
@@ -69,14 +69,13 @@ class Expense(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
         nullable=True,
     )
 
-    # Relationships
     applicant: Mapped[User] = relationship(
-        "User",
+        User,
         foreign_keys=[applicant_id],
         lazy="selectin",
     )
     assigned_approver: Mapped[User] = relationship(
-        "User",
+        User,
         foreign_keys=[assigned_approver_id],
         lazy="selectin",
     )
@@ -88,7 +87,6 @@ class Expense(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
         order_by="ApprovalLog.created_at.desc()",
     )
 
-    # Only composite indexes belong in __table_args__
     __table_args__ = (
         Index("ix_expenses_applicant_status", "applicant_id", "status"),
         Index("ix_expenses_approver_status", "assigned_approver_id", "status"),
@@ -119,8 +117,7 @@ class CategoryApprover(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
         index=True,
     )
 
-    # Relationship
-    approver: Mapped[User] = relationship("User", lazy="selectin")
+    approver: Mapped[User] = relationship(User, lazy="selectin")
 
     def __repr__(self) -> str:
         return f"<CategoryApprover category={self.category} approver_id={self.approver_id}>"

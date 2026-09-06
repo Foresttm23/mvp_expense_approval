@@ -2,17 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import TYPE_CHECKING
 
 from loguru import logger
 
 from app.core.ai_provider import LLMProvider
 from app.core.enums import AIAnalysisStatus
+from app.models.expense import Expense
 from app.schemas.ai import AIAnalysisResponse
-
-if TYPE_CHECKING:
-    from app.models.expense import Expense
-
 
 _SYSTEM_PROMPT = """\
 You are a financial compliance assistant.
@@ -68,14 +64,10 @@ class AIService:
         prompt = _build_prompt(expense)
 
         try:
-            raw: str = await asyncio.wait_for(
-                self._provider.analyse(prompt),
-                timeout=self._timeout,
-            )
+            async with asyncio.timeout(self._timeout):
+                raw: str = await self._provider.analyse(prompt)
         except TimeoutError:
-            log.warning(
-                f"AI provider timed out after {self._timeout}s — returning fallback"
-            )
+            log.warning(f"AI provider timed out after {self._timeout}s — returning fallback")
             return AIAnalysisResponse.fallback(AIAnalysisStatus.UNAVAILABLE)
         except Exception as exc:  # noqa: BLE001
             log.warning(f"AI provider raised an error — returning fallback: {exc}")

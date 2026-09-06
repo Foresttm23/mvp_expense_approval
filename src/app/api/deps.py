@@ -41,11 +41,9 @@ async def get_current_user(
     """
     Decode the JWT and return the associated ``User``.
 
-    Raises
-    ------
-    UnauthorizedActionError
-        If the token is expired, malformed, or the embedded subject does
-        not correspond to an existing active user.
+    Raises:
+        UnauthorizedActionError: If the token is expired, malformed, or the
+            embedded subject does not correspond to an existing active user.
     """
     try:
         payload = decode_access_token(token)
@@ -101,7 +99,7 @@ CurrentEmployee = Annotated[User, Depends(require_role(UserRole.EMPLOYEE))]
 def _build_ai_provider(settings: ExpenseSettings) -> LLMProvider:
     """
     Build and cache the LLM provider for the lifetime of the process.
-    
+
     If a new LLM provider is needed, add a new LLMProvider implementation
     and update this method to return the new provider.
     """

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 import app.models  # noqa: F401
 from alembic import context
 from app.core.config import get_settings
-from app.models.base import ExpenseBase
+from app.models.base import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -21,7 +21,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = ExpenseBase.metadata
+target_metadata = Base.metadata
 
 
 def get_url() -> str:
@@ -48,7 +48,6 @@ def run_migrations_offline() -> None:
         dialect_opts={"paramstyle": "named"},
     )
 
-
     with context.begin_transaction():
         context.run_migrations()
 
@@ -73,7 +72,6 @@ async def run_async_migrations() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
-
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

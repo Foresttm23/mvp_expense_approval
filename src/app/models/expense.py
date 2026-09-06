@@ -20,11 +20,6 @@ if TYPE_CHECKING:
 class Expense(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
     __tablename__ = "expenses"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     applicant_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),

@@ -1,29 +1,23 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Text, func
+from sqlalchemy import Enum, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.enums import ApprovalAction
-from app.models.base import ExpenseBase
+from app.models.base import CreatedAtMixin, ExpenseBase
 from app.models.user import User
 
 if TYPE_CHECKING:
     from app.models.expense import Expense
 
 
-class ApprovalLog(ExpenseBase):
+class ApprovalLog(ExpenseBase, CreatedAtMixin):
     __tablename__ = "approval_logs"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     expense_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("expenses.id", ondelete="CASCADE"),
@@ -44,14 +38,6 @@ class ApprovalLog(ExpenseBase):
         Text,
         nullable=True,
     )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False,
-        index=True,
-    )
-
-    # Relationships
     expense: Mapped[Expense] = relationship(
         "Expense",
         back_populates="approval_logs",

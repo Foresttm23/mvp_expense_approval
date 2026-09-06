@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import uuid
 from datetime import datetime
 
 from sqlalchemy import JSON, Boolean, DateTime, String
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.enums import UserRole
@@ -14,11 +12,6 @@ from app.models.base import CreatedAtMixin, ExpenseBase, UpdatedAtMixin
 class User(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
     __tablename__ = "users"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
     email: Mapped[str] = mapped_column(
         String(255),
         unique=True,
@@ -35,7 +28,7 @@ class User(ExpenseBase, CreatedAtMixin, UpdatedAtMixin):
     )
     roles: Mapped[list[str]] = mapped_column(
         JSON,
-        default=lambda: [UserRole.EMPLOYEE.value],
+        default=lambda: [str(UserRole.EMPLOYEE)],
         nullable=False,
     )
     is_active: Mapped[bool] = mapped_column(

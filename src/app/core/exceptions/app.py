@@ -43,3 +43,12 @@ class SessionNotInitializedException(AppException):
             else self.default_message
         )
         super().__init__(message)
+
+class AuthenticationError(AppException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    default_message = "Could not validate credentials"
+
+
+class ConflictError(AppException):
+    status_code = status.HTTP_409_CONFLICT
+    default_message = "Resource already exists"

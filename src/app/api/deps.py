@@ -15,7 +15,11 @@ from app.core.ai_provider import LLMProvider
 from app.core.config import ExpenseSettings, get_settings
 from app.core.database import db_session_manager
 from app.core.enums import UserRole
-from app.core.exceptions.app import NotFoundError, UnauthorizedActionError
+from app.core.exceptions.app import (
+    AuthenticationError,
+    NotFoundError,
+    UnauthorizedActionError,
+)
 from app.core.security import decode_access_token
 from app.models.user import User
 from app.repositories.user_repo import UserRepository
@@ -42,26 +46,26 @@ async def get_current_user(
     Decode the JWT and return the associated ``User``.
 
     Raises:
-        UnauthorizedActionError: If the token is expired, malformed, or the
+        AuthenticationError: If the token is expired, malformed, or the
             embedded subject does not correspond to an existing active user.
     """
     try:
         payload = decode_access_token(token)
         user_id: str | None = payload.get("sub")
         if not user_id:
-            raise UnauthorizedActionError("Token payload is missing subject.")
+            raise AuthenticationError("Token payload is missing subject.")
     except jwt.ExpiredSignatureError:
         logger.debug("Token expired")
-        raise UnauthorizedActionError("Token has expired.")
+        raise AuthenticationError("Token has expired.")
     except jwt.InvalidTokenError as exc:
         logger.debug("Invalid token: {}", exc)
-        raise UnauthorizedActionError("Invalid authentication token.")
+        raise AuthenticationError("Invalid authentication token.")
 
     user_repo = UserRepository(db)
     try:
         user = await user_repo.get_by_id(uuid.UUID(user_id))
     except (ValueError, TypeError):
-        raise UnauthorizedActionError("Could not validate credentials.")
+        raise AuthenticationError("Could not validate credentials.")
 
     if user is None:
         raise NotFoundError("User not found.")

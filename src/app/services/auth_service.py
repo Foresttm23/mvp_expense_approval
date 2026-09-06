@@ -6,9 +6,9 @@ from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions.app import (
+    AuthenticationError,
+    ConflictError,
     NotFoundError,
-    UnauthorizedActionError,
-    ValidationError,
 )
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models.user import User
@@ -26,10 +26,10 @@ class AuthService:
         Register a new user and return user instance with access token.
 
         Raises:
-            ValidationError: If a user with the same email already exists.
+            ConflictError: If a user with the same email already exists.
         """
         if await self._user_repo.get_by_email(payload.email):
-            raise ValidationError(
+            raise ConflictError(
                 f"A user with email '{payload.email}' already exists."
             )
 
@@ -52,17 +52,17 @@ class AuthService:
         Authenticate user by email and password and return access token.
 
         Raises:
-            UnauthorizedActionError: If credentials are invalid or the account is inactive.
+            AuthenticationError: If credentials are invalid or the account is inactive.
         """
         user = await self._user_repo.get_by_email(email)
 
         if user is None or not await verify_password(password, user.hashed_password):
             logger.bind(email=email).warning("Failed login attempt")
-            raise UnauthorizedActionError("Invalid email or password.")
+            raise AuthenticationError("Invalid email or password.")
 
         if not user.is_active:
             logger.bind(user_id=str(user.id)).warning("Inactive user login attempt")
-            raise UnauthorizedActionError("Account is deactivated.")
+            raise AuthenticationError("Account is deactivated.")
 
         logger.bind(user_id=str(user.id), email=email).info("User logged in")
         return Token(access_token=create_access_token(str(user.id), user.roles))

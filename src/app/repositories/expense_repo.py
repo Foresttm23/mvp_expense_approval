@@ -24,7 +24,13 @@ class ExpenseRepository(BaseRepository[Expense]):
         offset: int = 0,
         limit: int = 50,
     ) -> tuple[list[Expense], int]:
-        """Return all claims submitted by the given applicant."""
+        """
+        Query expenses by applicant ID ordered by creation date descending.
+
+        Returns
+        -------
+        ``(items, total_count)`` pair of claims submitted by *applicant_id*.
+        """
         stmt = (
             select(Expense)
             .where(Expense.applicant_id == applicant_id)
@@ -76,3 +82,21 @@ class ExpenseRepository(BaseRepository[Expense]):
         )
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def get_by_id_for_update(
+        self,
+        expense_id: uuid.UUID,
+    ) -> Expense | None:
+        """
+        Retrieve an expense by ID with an exclusive row lock (FOR UPDATE).
+
+        Guarantees final state.
+        """
+        stmt = (
+            select(Expense)
+            .where(Expense.id == expense_id)
+            .with_for_update()
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+

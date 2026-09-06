@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import AsyncGenerator
+from functools import cache
 from typing import Annotated
 
 import jwt
@@ -10,12 +11,16 @@ from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.ai_provider import LLMProvider
+from app.core.config import ExpenseSettings, get_settings
 from app.core.database import db_session_manager
 from app.core.enums import UserRole
 from app.core.exceptions.app import NotFoundError, UnauthorizedActionError
 from app.core.security import decode_access_token
 from app.models.user import User
 from app.repositories.user_repo import UserRepository
+from app.services.ai_service import AIService
+from app.services.providers.gemini_provider import GeminiProvider
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -90,3 +95,27 @@ def require_role(role: str):
 
 CurrentApprover = Annotated[User, Depends(require_role(UserRole.APPROVER))]
 CurrentEmployee = Annotated[User, Depends(require_role(UserRole.EMPLOYEE))]
+
+
+@cache
+def _build_ai_provider(settings: ExpenseSettings) -> LLMProvider:
+    """
+    Build and cache the LLM provider for the lifetime of the process.
+    
+    If a new LLM provider is needed, add a new LLMProvider implementation
+    and update this method to return the new provider.
+    """
+    return GeminiProvider(
+        api_key=settings.GEMINI_API_KEY,
+        model_name=settings.AI_MODEL_NAME,
+    )
+
+
+def get_ai_service(
+    settings: Annotated[ExpenseSettings, Depends(get_settings)],
+) -> AIService:
+    provider = _build_ai_provider(settings)
+    return AIService(provider=provider, timeout=settings.AI_TIMEOUT_SECONDS)
+
+
+AIServiceDep = Annotated[AIService, Depends(get_ai_service)]

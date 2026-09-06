@@ -19,6 +19,11 @@ class ExpenseSettings(BaseSettings):
     SECRET_KEY: str = "my_secret_key"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
+    # AI Advisory
+    GEMINI_API_KEY: str | None = None
+    AI_MODEL_NAME: str = "gemini-2.0-flash"
+    AI_TIMEOUT_SECONDS: float = 5.0
+
     DEFAULT_CATEGORY_APPROVERS: dict[str, str] = {
         "OFFICE": "approver_office@example.com",
         "TRAVEL": "approver_travel@example.com",

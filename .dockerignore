@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.pyc
+
+# Virtual environment
+.venv/
+
+# uv cache
+.uv/
+
+# Development / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Git
+.git/
+.gitignore
+
+# Docs
+README.md
+AGENTS.md
+
+# Logs
+logs/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -100,7 +100,7 @@ CurrentEmployee = Annotated[User, Depends(require_role(UserRole.EMPLOYEE))]
 
 
 @cache
-def _build_ai_provider(settings: ExpenseSettings) -> LLMProvider:
+def _build_ai_provider(api_key: str | None, model_name: str) -> LLMProvider:
     """
     Build and cache the LLM provider for the lifetime of the process.
 
@@ -108,15 +108,15 @@ def _build_ai_provider(settings: ExpenseSettings) -> LLMProvider:
     and update this method to return the new provider.
     """
     return GeminiProvider(
-        api_key=settings.GEMINI_API_KEY,
-        model_name=settings.AI_MODEL_NAME,
+        api_key=api_key,
+        model_name=model_name,
     )
 
 
 def get_ai_service(
     settings: Annotated[ExpenseSettings, Depends(get_settings)],
 ) -> AIService:
-    provider = _build_ai_provider(settings)
+    provider = _build_ai_provider(settings.GEMINI_API_KEY, settings.AI_MODEL_NAME)
     return AIService(provider=provider, timeout=settings.AI_TIMEOUT_SECONDS)
 
 

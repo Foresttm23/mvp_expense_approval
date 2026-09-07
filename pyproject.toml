@@ -20,7 +20,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.0",
     "pytest-asyncio>=1.4.0",
     "pytest-cov>=7.1.0",
     "ruff>=0.16.6",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+testpaths = ["tests"]

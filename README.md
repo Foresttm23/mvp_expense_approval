@@ -6,8 +6,6 @@ A production-ready, async RESTful API coordinating organizational financial reim
 
 ## Overview & Core Workflow
 
-The service coordinates internal financial reimbursement claims (*expense claims*) within an organization:
-
 1. **Submission & Automatic Routing**: An employee submits an expense claim with an amount (USD), category, description, expense date, and payment details. The system automatically routes and assigns the designated approver based on the chosen category (`OFFICE`, `TRAVEL`, `CLIENT_ENTERTAINMENT`, `SOFTWARE_SUBSCRIPTIONS`, `OTHER`).
 2. **Review & AI Advisory**: When an assigned approver opens a claim from their queue, an integrated AI advisory generates a 1–2 sentence executive summary and flags potential inconsistencies (e.g., category is `OFFICE` but description mentions flights). The AI advisory is strictly non-blocking: if the model times out or fails, review and approval proceed unaffected.
 3. **Approval Decision**: The assigned approver approves or rejects the claim. Rejections strictly require a non-empty reason.
@@ -18,13 +16,13 @@ The service coordinates internal financial reimbursement claims (*expense claims
 
 ## Tech Stack
 
-- **Language & Runtime**: Python 3.13+ (strict typing, PEP 695 generics)
-- **Web Framework**: FastAPI (with `Annotated` dependency injection)
-- **Database & ORM**: PostgreSQL via `asyncpg` & SQLAlchemy 2.0 (async sessions)
+- **Language & Runtime**: Python 3.13+
+- **Web Framework**: FastAPI
+- **Database & ORM**: PostgreSQL via `asyncpg` & SQLAlchemy 2.0
 - **Migrations**: Alembic
-- **Authentication & Security**: PyJWT (`HS256`), `pwdlib` (`Argon2`), OAuth2 Password Bearer flow
+- **Authentication & Security**: PyJWT, `pwdlib`, OAuth2 Password Bearer flow
 - **Validation**: Pydantic v2
-- **Logging**: Loguru (structured logging with contextual bindings)
+- **Logging**: Loguru
 
 ---
 
@@ -66,46 +64,24 @@ src/app/
 
 ## Local Development
 
-### 1. Environment Setup
+Docker Compose is pre-configured for hot-reloading development: `./src` is volume-mounted into the API container and `docker-entrypoint.sh` runs with the `--reload` flag.
 
-Copy `.env.sample` to `.env` and configure variables:
-```bash
-cp .env.sample .env
-```
+### 1. Running with Docker Compose
 
-### 2. Install Dependencies
-
-Using [uv](https://github.com/astral-sh/uv):
-```bash
-uv sync
-```
-
-### 3. Run Migrations
-
-```bash
-uv run alembic upgrade head
-```
-
-### 4. Run Development Server
-
-```bash
-uv run uvicorn app.main:app --reload --port 8000
-```
-
-### 5. Running Tests
-
-```bash
-uv run pytest
-```
-
-### 6. Running with Docker Compose
-
-To start both PostgreSQL and the API service in containers:
+To build and start both PostgreSQL and the API service:
 ```bash
 docker compose up --build
 ```
 
-Interactive API documentation will be available at:
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+The service automatically applies migrations and seeds initial users upon startup. Interactive API documentation will be available at:
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
 
+### 2. Running Tests
+
+The test suite requires a running database instance (`test_db`). Start the PostgreSQL container in the background, then run `pytest`:
+
+```bash
+docker compose up -d db
+uv run pytest
+```

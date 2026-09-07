@@ -5,6 +5,7 @@ import uuid
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.enums import UserRole
 from app.core.exceptions.app import (
     AuthenticationError,
     ConflictError,
@@ -37,6 +38,8 @@ class AuthService:
         user = await self._user_repo.create(
             **payload.model_dump(exclude={"password"}),
             hashed_password=hashed,
+            roles=[str(UserRole.EMPLOYEE)], # default: employee role
+            is_active=True,
         )
         await self._session.commit()
 

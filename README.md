@@ -4,6 +4,18 @@ A production-ready, async RESTful API coordinating organizational financial reim
 
 ---
 
+## Overview & Core Workflow
+
+The service coordinates internal financial reimbursement claims (*expense claims*) within an organization:
+
+1. **Submission & Automatic Routing**: An employee submits an expense claim with an amount (USD), category, description, expense date, and payment details. The system automatically routes and assigns the designated approver based on the chosen category (`OFFICE`, `TRAVEL`, `CLIENT_ENTERTAINMENT`, `SOFTWARE_SUBSCRIPTIONS`, `OTHER`).
+2. **Review & AI Advisory**: When an assigned approver opens a claim from their queue, an integrated AI advisory generates a 1–2 sentence executive summary and flags potential inconsistencies (e.g., category is `OFFICE` but description mentions flights). The AI advisory is strictly non-blocking: if the model times out or fails, review and approval proceed unaffected.
+3. **Approval Decision**: The assigned approver approves or rejects the claim. Rejections strictly require a non-empty reason.
+4. **Applicant Control**: The applicant can withdraw a claim at any point while it is still `pending`. Once resolved (`approved`, `rejected`, or `withdrawn`), the state is immutable.
+5. **Dual-Role & Data Isolation**: Users can hold both `employee` and `approver` roles concurrently. Strict scoping guarantees employees only access their own submissions and approvers only access claims routed to them.
+
+---
+
 ## Tech Stack
 
 - **Language & Runtime**: Python 3.13+ (strict typing, PEP 695 generics)
@@ -80,6 +92,20 @@ uv run alembic upgrade head
 uv run uvicorn app.main:app --reload --port 8000
 ```
 
+### 5. Running Tests
+
+```bash
+uv run pytest
+```
+
+### 6. Running with Docker Compose
+
+To start both PostgreSQL and the API service in containers:
+```bash
+docker compose up --build
+```
+
 Interactive API documentation will be available at:
 - **Swagger UI**: `http://localhost:8000/docs`
 - **ReDoc**: `http://localhost:8000/redoc`
+
